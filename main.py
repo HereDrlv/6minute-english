@@ -15,14 +15,13 @@ def _download():
         os.makedirs(_dir)
 
     headers = {
-        # 'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
-        # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
-        # 'Accept-Encoding': 'gzip, deflate',
-        # 'Accept-Language': 'en-US,en;q=0.8,zh-Hans-CN;q=0.5,zh-Hans;q=0.3',
-        # 'Content-Type': 'text/plain;charset=UTF-8',
+        'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
+        'Accept-Encoding': 'gzip, deflate',
+        'Accept-Language': 'en-US,en;q=0.8,zh-Hans-CN;q=0.5,zh-Hans;q=0.3',
+        'Content-Type': 'text/plain;charset=UTF-8',
         'Host': 'www.bbc.co.uk',
-        # 'Origin': 'http://www.bbc.co.uk/learningenglish/english/features/6-minute-english',
-        # 'Referer': 'http://www.bbc.co.uk/learningenglish/english/features/6-minute-english',
+        'Referer': 'http://www.bbc.co.uk/learningenglish/english/features/6-minute-english',
     }
     session = requests.Session()
     url = 'http://www.bbc.co.uk/learningenglish/english/features/6-minute-english'
@@ -42,18 +41,16 @@ def _download():
         date = p.find('div', attrs={'class': 'details'}).find('h3').get_text()
         match = re.search(r'(?P<date>\d{2}\s\w{3}\s\d{4})', date)
         date = datetime.strptime(match.group('date'), '%d %b %Y').strftime('%Y-%m-%d')
-        title = date + ' ' + title
 
-        pod_path = os.path.join(_dir + '/' + title)
-        pdf_path = os.path.join(pod_path + '/transcript.pdf')
-        mp3_path = os.path.join(pod_path + '/audio.mp3')
+        pod_path = os.path.join(_dir + '/' + date + ' ' + title)
+        pdf_path = os.path.join(pod_path + '/{0}.pdf'.format(title))
+        mp3_path = os.path.join(pod_path + '/{0}.mp3'.format(title))
 
         if not os.path.exists(pod_path) or not os.path.exists(pdf_path) or not os.path.exists(mp3_path):
             if not os.path.exists(pod_path):
                 os.makedirs(pod_path)
 
             url = 'http://www.bbc.co.uk' + a['href']
-            print(url)
             response = requests.get(url, headers=headers).content
 
             soup = BeautifulSoup(response, 'html.parser')
