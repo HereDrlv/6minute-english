@@ -14,11 +14,13 @@ def _download():
         os.makedirs(_dir)
 
     headers = {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, sdch',
-        'Accept-Language': 'en-US,en;q=0.8,bg;q=0.6,mk;q=0.4,ru;q=0.2,uk;q=0.2,mn;q=0.2,ko;q=0.2,ja;q=0.2,da;q=0.2,fr-FR;q=0.2,fr;q=0.2,ar;q=0.2,he;q=0.2,fi;q=0.2,pt-PT;q=0.2,pt;q=0.2,lt;q=0.2,tr;q=0.2',
+        'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
+        'Accept-Encoding': 'gzip, deflate',
+        'Accept-Language': 'en-US,en;q=0.8,zh-Hans-CN;q=0.5,zh-Hans;q=0.3',
+        'Content-Type': 'text/plain;charset=UTF-8',
         'Host': 'www.bbc.co.uk',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+        'Origin': 'http://www.bbc.co.uk/learningenglish/english/features/6-minute-english',
         'Referer': 'http://www.bbc.co.uk/learningenglish/english/features/6-minute-english',
     }
     session = requests.Session()
@@ -42,7 +44,10 @@ def _download():
         title = date + ' ' + title
 
         pod_path = os.path.join(_dir + '/' + title)
-        if not os.path.exists(pod_path):
+        pdf_path = os.path.join(pod_path + '/transcript.pdf')
+        mp3_path = os.path.join(pod_path + '/audio.mp3')
+
+        if not os.path.exists(pod_path) and not os.path.exists(pdf_path) and not os.path.exists(mp3_path):
             os.makedirs(pod_path)
 
             url = 'http://www.bbc.co.uk' + a['href']
@@ -51,18 +56,16 @@ def _download():
             soup = BeautifulSoup(response, 'html.parser')
             soup = soup.find('div', attrs={'id': 'bbcle-content'})
             soup = soup.find('div', attrs={'class': 'widget-container widget-container-right'})
+            # soup = soup.find('div', attrs={'class': 'widget widget-pagelink widget-pagelink-download'})
 
-            pdf = soup.find('div', attrs={'class': 'widget-pagelink-download-inner bbcle-download-linkparent-extension-pdf'})
-            mp3 = soup.find('div', attrs={'class': 'widget-pagelink-download-inner bbcle-download-linkparent-extension-mp3'})
+            pdf = soup.find('a', attrs={'class': 'download bbcle-download-extension-pdf'})
+            mp3 = soup.find('a', attrs={'class': 'download bbcle-download-extension-mp3'})
 
-            pdf_path = os.path.join(pod_path + '/transcript.pdf')
-            mp3_path = os.path.join(pod_path + '/audio.mp3')
-
-            response = session.get(pdf.find('a')['href'], headers=headers)
+            response = session.get(pdf['href'], headers=headers)
             with open(pdf_path, 'wb') as f:
                 f.write(response.content)
 
-            response = session.get(mp3.find('a')['href'], headers=headers)
+            response = session.get(mp3['href'], headers=headers)
             with open(mp3_path, 'wb') as f:
                 f.write(response.content)
 
