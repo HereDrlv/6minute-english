@@ -53,14 +53,20 @@ def _download():
                 os.makedirs(pod_path)
 
             url = 'http://www.bbc.co.uk' + a['href']
+            print(url)
             response = requests.get(url, headers=headers).content
 
             soup = BeautifulSoup(response, 'html.parser')
             soup = soup.find('div', attrs={'id': 'bbcle-content'})
             soup = soup.find('div', attrs={'class': 'widget-container widget-container-right'})
+            soup = soup.find('div', attrs={'class': 'widget widget-pagelink widget-pagelink-download '})
 
-            pdf = soup.find('a', attrs={'class': 'download bbcle-download-extension-pdf'})
-            mp3 = soup.find('a', attrs={'class': 'download bbcle-download-extension-mp3'})
+            links = soup.findAll('a')
+
+            # pdf = soup.find('a', attrs={'class': 'download bbcle-download-extension-pdf'})
+            # mp3 = soup.find('a', attrs={'class': 'download bbcle-download-extension-mp3'})
+            pdf = links[0]
+            mp3 = links[1]
 
             if not os.path.exists(pdf_path):
                 wget.download(pdf['href'], pdf_path)
@@ -72,6 +78,8 @@ def _download():
         else:
             print('Skip.....', title)
             continue
+
+    print('Done .... Downloaded')
 
 
 if __name__ == "__main__":
