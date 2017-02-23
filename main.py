@@ -41,19 +41,19 @@ def _download():
         date = datetime.strptime(match.group('date'), '%d %b %Y').strftime('%Y-%m-%d')
         title = date + ' ' + title
 
-        url = 'http://www.bbc.co.uk' + a['href']
-        response = session.get(url, headers=headers).content
-
-        soup = BeautifulSoup(response, 'html.parser')
-        soup = soup.find('div', attrs={'id': 'bbcle-content'})
-        soup = soup.find('div', attrs={'class': 'widget-container widget-container-right'})
-
-        pdf = soup.find('div', attrs={'class': 'widget-pagelink-download-inner bbcle-download-linkparent-extension-pdf'})
-        mp3 = soup.find('div', attrs={'class': 'widget-pagelink-download-inner bbcle-download-linkparent-extension-mp3'})
-
         pod_path = os.path.join(_dir + '/' + title)
         if not os.path.exists(pod_path):
             os.makedirs(pod_path)
+
+            url = 'http://www.bbc.co.uk' + a['href']
+            response = session.get(url, headers=headers).content
+
+            soup = BeautifulSoup(response, 'html.parser')
+            soup = soup.find('div', attrs={'id': 'bbcle-content'})
+            soup = soup.find('div', attrs={'class': 'widget-container widget-container-right'})
+
+            pdf = soup.find('div', attrs={'class': 'widget-pagelink-download-inner bbcle-download-linkparent-extension-pdf'})
+            mp3 = soup.find('div', attrs={'class': 'widget-pagelink-download-inner bbcle-download-linkparent-extension-mp3'})
 
             pdf_path = os.path.join(pod_path + '/transcript.pdf')
             mp3_path = os.path.join(pod_path + '/audio.mp3')
